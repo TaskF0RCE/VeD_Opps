@@ -182,9 +182,14 @@ export function NewReleaseDialog({ onClose }: { onClose: () => void }) {
             Pas de PR ? C’est qu’aucune PR <code>feat</code> ou <code>fix</code> n’a été mergée depuis la dernière release. Le détail est
             dans <ExternalLink href={actionsUrl}>l’onglet Actions du repo</ExternalLink>.
           </p>
-          <button className="btn" onClick={onClose}>
-            Fermer
-          </button>
+          <div className="row">
+            <a className="btn btn-primary" href={`#/pr?repo=${encodeURIComponent(repo)}`} onClick={onClose}>
+              Voir les PR de {repo}
+            </a>
+            <button className="btn" onClick={onClose}>
+              Fermer
+            </button>
+          </div>
         </div>
       )}
     </Modal>
@@ -237,9 +242,15 @@ export function NewProjectDialog({ onClose }: { onClose: () => void }) {
         <LogBox lines={lines} />
         {error && <ErrorBox message={error} />}
         {url ? (
-          <p>
-            ✓ Projet prêt : <ExternalLink href={url}>{url}</ExternalLink>
-          </p>
+          <>
+            <p>
+              ✓ Projet prêt : <ExternalLink href={url}>{url}</ExternalLink>
+            </p>
+            <p className="muted small">Prochaine étape : « ＋ Nouvelle feature » dans ce projet.</p>
+            <button type="button" className="btn" onClick={onClose}>
+              Fermer
+            </button>
+          </>
         ) : (
           <button className="btn btn-primary" disabled={running || !nameOk}>
             {running ? 'Création…' : 'Créer le projet'}

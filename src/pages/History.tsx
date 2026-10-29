@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify'
 import { useMemo, useState } from 'react'
 import { useSession } from '../context'
 import { fetchReleases } from '../github/queries'
-import { formatDate, useAsync } from '../hooks'
+import { type PageProps, formatDate, useAsync } from '../hooks'
 import { Empty, ErrorBox, ExternalLink, Spinner } from '../components/ui'
 
 // Les notes de release viennent de GitHub déjà converties en HTML ;
@@ -15,10 +15,10 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 })
 const clean = (html: string) => DOMPurify.sanitize(html, { USE_PROFILES: { html: true } })
 
-export function History() {
+export function History({ params }: PageProps) {
   const { gh } = useSession()
   const releases = useAsync(() => fetchReleases(gh), [gh])
-  const [repo, setRepo] = useState('')
+  const [repo, setRepo] = useState(params.get('repo') ?? '')
 
   const repoNames = useMemo(() => [...new Set((releases.data ?? []).map((r) => r.repo))].sort(), [releases.data])
   const list = (releases.data ?? []).filter((r) => !repo || r.repo === repo)

@@ -63,9 +63,9 @@ export function Overview() {
                   <dt>Version</dt>
                   <dd>
                     {repo.latestRelease ? (
-                      <ExternalLink href={repo.latestRelease.url}>
+                      <a href={`#/historique?repo=${encodeURIComponent(repo.name)}`} title="Voir l’historique des versions">
                         <span className="version">{repo.latestRelease.tagName}</span>
-                      </ExternalLink>
+                      </a>
                     ) : (
                       <span className="muted">aucune</span>
                     )}
@@ -83,7 +83,9 @@ export function Overview() {
                 <div>
                   <dt>PR</dt>
                   <dd>
-                    <a href="#/pr">{repo.openPRs}</a>
+                    <a href={`#/pr?repo=${encodeURIComponent(repo.name)}`} title="Voir les PR de ce repo">
+                      {repo.openPRs}
+                    </a>
                   </dd>
                 </div>
                 <div>

@@ -1,10 +1,10 @@
-import { useCallback, useMemo, useState } from 'react'
+import { type ComponentType, useCallback, useMemo, useState } from 'react'
 import { ORG } from './config'
 import { type Session, SessionContext } from './context'
 import { makeClient } from './github/client'
 import { fetchRepos, fetchViewer } from './github/queries'
 import { clearToken, loadToken, saveToken } from './github/token'
-import { useAsync, useHashRoute, useTheme } from './hooks'
+import { type PageProps, useAsync, useHashRoute, useTheme } from './hooks'
 import { Login } from './components/Login'
 import { NewFeatureDialog, NewProjectDialog, NewReleaseDialog } from './components/dialogs'
 import { ErrorBox, Spinner } from './components/ui'
@@ -13,11 +13,12 @@ import { History } from './pages/History'
 import { Overview } from './pages/Overview'
 import { PullRequests } from './pages/PullRequests'
 
-const PAGES = [
-  { route: 'repos', label: 'Vue d’ensemble', Page: Overview },
-  { route: 'pr', label: 'Pull requests', Page: PullRequests },
-  { route: 'historique', label: 'Historique', Page: History },
-  { route: 'admin', label: 'Admin', Page: Admin },
+// `short` : libellé affiché sur mobile, pour que les 4 onglets tiennent sur une ligne.
+const PAGES: { route: string; label: string; short: string; Page: ComponentType<PageProps> }[] = [
+  { route: 'repos', label: 'Vue d’ensemble', short: 'Repos', Page: Overview },
+  { route: 'pr', label: 'Pull requests', short: 'PR', Page: PullRequests },
+  { route: 'historique', label: 'Historique', short: 'Historique', Page: History },
+  { route: 'admin', label: 'Admin', short: 'Admin', Page: Admin },
 ]
 
 type Dialog = 'feature' | 'release' | 'project' | null
@@ -50,7 +51,7 @@ function Dashboard({ token, theme, onLogout, onToggleTheme }: DashboardProps) {
   const gh = useMemo(() => makeClient(token), [token])
   const viewer = useAsync(() => fetchViewer(gh), [gh])
   const repos = useAsync(() => fetchRepos(gh), [gh])
-  const route = useHashRoute()
+  const { route, params } = useHashRoute()
   const [dialog, setDialog] = useState<Dialog>(null)
   const [toast, setToast] = useState<{ message: string; kind: 'ok' | 'error' } | null>(null)
 
@@ -82,13 +83,14 @@ function Dashboard({ token, theme, onLogout, onToggleTheme }: DashboardProps) {
         <a className="brand" href="#/">
           <img src="./favicon.svg" alt="" width={28} height={28} />
           <span>
-            VeD Opps <small className="muted">· {ORG}</small>
+            VeD Opps <small className="muted hide-mobile">· {ORG}</small>
           </span>
         </a>
         <nav className="tabs" aria-label="Navigation">
           {PAGES.map((p) => (
             <a key={p.route} href={`#/${p.route}`} className={p === current ? 'tab active' : 'tab'} aria-current={p === current ? 'page' : undefined}>
-              {p.label}
+              <span className="hide-mobile">{p.label}</span>
+              <span className="show-mobile">{p.short}</span>
             </a>
           ))}
         </nav>
@@ -117,7 +119,7 @@ function Dashboard({ token, theme, onLogout, onToggleTheme }: DashboardProps) {
       </div>
 
       <main className="content">
-        <current.Page />
+        <current.Page params={params} />
       </main>
 
       {dialog === 'feature' && <NewFeatureDialog onClose={() => setDialog(null)} />}

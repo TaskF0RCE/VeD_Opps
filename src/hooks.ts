@@ -34,16 +34,27 @@ export function useAsync<T>(load: () => Promise<T>, deps: unknown[]): AsyncState
   return { data, error, loading, reload }
 }
 
-// Navigation par l'ancre de l'URL (#/pr, #/historique…) : marche sur GitHub Pages sans serveur.
-export function useHashRoute(): string {
-  const read = () => window.location.hash.replace(/^#\/?/, '') || 'repos'
-  const [route, setRoute] = useState(read)
+// Props reçues par chaque onglet.
+export interface PageProps {
+  params: URLSearchParams
+}
+
+export interface HashRoute {
+  route: string
+  params: URLSearchParams
+}
+
+// Navigation par l'ancre de l'URL (#/pr?repo=x, #/historique…) : marche sur GitHub Pages sans serveur.
+export function useHashRoute(): HashRoute {
+  const read = () => window.location.hash.replace(/^#\/?/, '')
+  const [hash, setHash] = useState(read)
   useEffect(() => {
-    const onChange = () => setRoute(read())
+    const onChange = () => setHash(read())
     window.addEventListener('hashchange', onChange)
     return () => window.removeEventListener('hashchange', onChange)
   }, [])
-  return route
+  const [route, query = ''] = hash.split('?')
+  return { route: route || 'repos', params: new URLSearchParams(query) }
 }
 
 type Theme = 'dark' | 'light'
