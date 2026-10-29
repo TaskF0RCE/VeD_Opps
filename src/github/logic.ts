@@ -69,17 +69,26 @@ export function isValidRepoName(name: string) {
 export interface ReviewLite {
   author: string | null
   state: string
+  // Commit sur lequel la review a été faite.
+  commit: string | null
 }
 
-export function reviewSummary(reviews: ReviewLite[], prAuthor: string | null) {
+// Une approbation ne compte que si elle porte sur le dernier commit de la PR :
+// du code poussé après l'approbation n'a été relu par personne.
+// (C'est ce que fait la protection de main sur les repos publics.)
+export function reviewSummary(reviews: ReviewLite[], prAuthor: string | null, headCommit: string) {
   const approvedBy: string[] = []
+  const staleApprovals: string[] = []
   const changesRequestedBy: string[] = []
   for (const review of reviews) {
     if (!review.author || review.author === prAuthor) continue
-    if (review.state === 'APPROVED') approvedBy.push(review.author)
+    if (review.state === 'APPROVED') {
+      if (review.commit === headCommit) approvedBy.push(review.author)
+      else staleApprovals.push(review.author)
+    }
     if (review.state === 'CHANGES_REQUESTED') changesRequestedBy.push(review.author)
   }
-  return { approvedBy, changesRequestedBy }
+  return { approvedBy, staleApprovals, changesRequestedBy }
 }
 
 export interface MergeInput {
@@ -89,6 +98,7 @@ export interface MergeInput {
   mergeable: string
   ci: CiState
   approvedBy: string[]
+  staleApprovals: string[]
   changesRequestedBy: string[]
 }
 
@@ -103,6 +113,8 @@ export function mergeBlockers(pr: MergeInput, wipLabel: string): string[] {
   if (pr.ci === 'none') reasons.push("La CI n'a pas tourné")
   if (pr.changesRequestedBy.length > 0)
     reasons.push(`Modifications demandées par ${pr.changesRequestedBy.join(', ')}`)
+  else if (pr.approvedBy.length === 0 && pr.staleApprovals.length > 0)
+    reasons.push(`Nouveaux commits depuis l'approbation de ${pr.staleApprovals.join(', ')} : à réapprouver`)
   else if (pr.approvedBy.length === 0) reasons.push('Pas encore approuvée')
   if (!isConventionalTitle(pr.title)) reasons.push('Titre non conforme (ex : « feat: ajoute la connexion »)')
   return reasons

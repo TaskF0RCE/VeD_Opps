@@ -68,12 +68,21 @@ describe('reviews et merge', () => {
     expect(
       reviewSummary(
         [
-          { author: 'snakeify', state: 'APPROVED' },
-          { author: 'klem844', state: 'CHANGES_REQUESTED' },
+          { author: 'snakeify', state: 'APPROVED', commit: 'head' },
+          { author: 'klem844', state: 'CHANGES_REQUESTED', commit: 'head' },
         ],
         'snakeify',
+        'head',
       ),
-    ).toEqual({ approvedBy: [], changesRequestedBy: ['klem844'] })
+    ).toEqual({ approvedBy: [], staleApprovals: [], changesRequestedBy: ['klem844'] })
+  })
+
+  it('ne compte pas une approbation faite avant les derniers commits', () => {
+    expect(reviewSummary([{ author: 'klem844', state: 'APPROVED', commit: 'ancien' }], 'snakeify', 'head')).toEqual({
+      approvedBy: [],
+      staleApprovals: ['klem844'],
+      changesRequestedBy: [],
+    })
   })
 
   const ready = {
@@ -83,6 +92,7 @@ describe('reviews et merge', () => {
     mergeable: 'MERGEABLE',
     ci: 'success' as const,
     approvedBy: ['klem844'],
+    staleApprovals: [],
     changesRequestedBy: [],
   }
 
@@ -93,6 +103,9 @@ describe('reviews et merge', () => {
   it('bloque et explique pourquoi', () => {
     expect(mergeBlockers({ ...ready, ci: 'failure', approvedBy: [] }, 'en cours')).toEqual(['CI rouge', 'Pas encore approuvée'])
     expect(mergeBlockers({ ...ready, labels: ['en cours'] }, 'en cours')).toEqual(['Marquée « en cours »'])
+    expect(mergeBlockers({ ...ready, approvedBy: [], staleApprovals: ['klem844'] }, 'en cours')).toEqual([
+      "Nouveaux commits depuis l'approbation de klem844 : à réapprouver",
+    ])
     expect(mergeBlockers({ ...ready, isDraft: true, mergeable: 'CONFLICTING' }, 'en cours')).toEqual([
       "C'est encore un brouillon",
       'Conflit avec main à résoudre',

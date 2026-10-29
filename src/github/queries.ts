@@ -125,6 +125,7 @@ export interface PullRequest {
   labels: string[]
   requestedReviewers: string[]
   approvedBy: string[]
+  staleApprovals: string[]
   changesRequestedBy: string[]
   ci: CiState
 }
@@ -144,7 +145,7 @@ interface PrNode {
   author: { login: string; avatarUrl: string } | null
   labels: { nodes: { name: string }[] }
   reviewRequests: { nodes: { requestedReviewer: { login?: string } | null }[] }
-  latestOpinionatedReviews: { nodes: { state: string; author: { login: string } | null }[] }
+  latestOpinionatedReviews: { nodes: { state: string; author: { login: string } | null; commit: { oid: string } | null }[] }
 }
 
 const PRS_QUERY = /* GraphQL */ `
@@ -160,7 +161,7 @@ const PRS_QUERY = /* GraphQL */ `
               author { login avatarUrl }
               labels(first: 10) { nodes { name } }
               reviewRequests(first: 10) { nodes { requestedReviewer { ... on User { login } } } }
-              latestOpinionatedReviews(first: 10) { nodes { state author { login } } }
+              latestOpinionatedReviews(first: 10) { nodes { state author { login } commit { oid } } }
             }
           }
         }
@@ -179,8 +180,9 @@ export async function fetchPullRequests(gh: GitHub): Promise<PullRequest[]> {
   const list = await mapLimit(prs, 6, async ({ repo, pr }): Promise<PullRequest> => {
     const author = pr.author?.login ?? null
     const reviews = reviewSummary(
-      pr.latestOpinionatedReviews.nodes.map((r) => ({ author: r.author?.login ?? null, state: r.state })),
+      pr.latestOpinionatedReviews.nodes.map((r) => ({ author: r.author?.login ?? null, state: r.state, commit: r.commit?.oid ?? null })),
       author,
+      pr.headRefOid,
     )
     return {
       id: pr.id,
