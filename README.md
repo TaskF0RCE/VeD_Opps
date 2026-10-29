@@ -5,6 +5,8 @@ tous les repos, leur version, leur CI, les pull requests et les releases au mêm
 
 👉 **https://taskf0rce.github.io/VeD_Opps/**
 
+Nouveau dans l'équipe ? Commence par le guide [Premiers pas](docs/PREMIERS-PAS.md).
+
 ## Ce qu'on peut faire
 
 | Onglet / bouton | À quoi ça sert |
