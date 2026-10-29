@@ -43,8 +43,12 @@ export async function markReadyForReview(gh: GitHub, pr: PullRequest) {
   if (reviewers.length > 0) {
     await gh.rest.pulls.requestReviewers({ owner: ORG, repo: pr.repo, pull_number: pr.number, reviewers })
   }
-  const kanban = await findKanban(gh).catch(() => null)
-  if (kanban) await placeOnKanban(gh, kanban, pr.id, 'review')
+  try {
+    const kanban = await findKanban(gh)
+    if (kanban) await placeOnKanban(gh, kanban, pr.id, 'review')
+  } catch {
+    // Le kanban est un bonus : la PR est déjà prête même s'il n'est pas à jour.
+  }
 }
 
 export interface FeatureInput {
