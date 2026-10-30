@@ -28,6 +28,17 @@ describe('ciState', () => {
     ).toBe('failure')
   })
 
+  it('ignore les runs en attente d’approbation (PR du bot de release)', () => {
+    expect(
+      ciState([
+        run(1, 'completed', 'action_required', '2026-01-01T10:00:00Z'),
+        run(1, 'completed', 'success', '2026-01-01T10:00:01Z'),
+        run(2, 'completed', 'action_required', '2026-01-01T10:00:00Z'),
+      ]),
+    ).toBe('success')
+    expect(ciState([run(2, 'completed', 'action_required', '2026-01-01T10:00:00Z')])).toBe('none')
+  })
+
   it('est en cours si un workflow n’est pas fini', () => {
     expect(
       ciState([run(1, 'queued', null, '2026-01-01T10:00:00Z'), run(2, 'completed', 'skipped', '2026-01-01T10:00:00Z')]),
