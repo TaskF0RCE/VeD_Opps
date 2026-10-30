@@ -1,0 +1,28 @@
+{
+  "name": "ved-opps",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Tableau de bord de l'organisation TaskF0RCE",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@octokit/rest": "22.0.1",
+    "dompurify": "3.4.17",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "6.0.3",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  }
+}
