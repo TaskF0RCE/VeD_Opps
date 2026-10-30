@@ -109,9 +109,11 @@ export function Admin() {
               ✓ <ExternalLink href={kanban.data.url}>{PROJECT_TITLE}</ExternalLink> trouvé.
               {missingColumns.length > 0 && <span className="text-danger"> Colonnes manquantes : {missingColumns.join(', ')}.</span>}
             </p>
+          ) : kanban.error ? (
+            <p className="muted small text-danger">{kanban.error}</p>
           ) : (
             <p className="muted small text-danger">
-              « {PROJECT_TITLE} » introuvable{kanban.error ? ` (${kanban.error})` : ''}. Crée-le en suivant le{' '}
+              « {PROJECT_TITLE} » introuvable. Crée-le en suivant le{' '}
               <ExternalLink href={`https://github.com/${ORG}/${ORG_CONFIG_REPO}#kanban`}>README du repo {ORG_CONFIG_REPO}</ExternalLink>.
             </p>
           )}

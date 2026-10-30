@@ -13,9 +13,12 @@ const OK_CONCLUSIONS = new Set(['success', 'skipped', 'neutral'])
 
 // État de la CI d'un commit : on garde le dernier run de chaque workflow,
 // puis rouge si un seul échoue, en cours si un seul tourne encore.
+// Les runs « action_required » n'ont jamais tourné : GitHub attend qu'un humain
+// les autorise (cas des PR ouvertes par le bot de release). On les ignore.
 export function ciState(runs: RunLite[]): CiState {
   const latest = new Map<number, RunLite>()
   for (const run of runs) {
+    if (run.conclusion === 'action_required') continue
     const previous = latest.get(run.workflow_id)
     if (!previous || run.created_at > previous.created_at) latest.set(run.workflow_id, run)
   }

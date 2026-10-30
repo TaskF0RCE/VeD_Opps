@@ -13,34 +13,46 @@ export interface Kanban {
   options: Partial<Record<StatusKey, string>>
 }
 
-export async function findKanban(gh: GitHub): Promise<Kanban | null> {
-  const data: {
-    organization: {
-      projectsV2: {
-        nodes: {
-          id: string
-          title: string
-          url: string
-          closed: boolean
-          field: { id: string; options?: { id: string; name: string }[] } | null
-        }[]
-      }
+interface ProjectsData {
+  organization: {
+    projectsV2: {
+      nodes: {
+        id: string
+        title: string
+        url: string
+        closed: boolean
+        field: { id: string; options?: { id: string; name: string }[] } | null
+      }[]
     }
-  } = await gh.graphql(
-    /* GraphQL */ `
-      query ($org: String!) {
-        organization(login: $org) {
-          projectsV2(first: 30) {
-            nodes {
-              id title url closed
-              field(name: "Status") { ... on ProjectV2SingleSelectField { id options { id name } } }
+  }
+}
+
+export async function findKanban(gh: GitHub): Promise<Kanban | null> {
+  let data: ProjectsData
+  try {
+    data = await gh.graphql(
+      /* GraphQL */ `
+        query ($org: String!) {
+          organization(login: $org) {
+            projectsV2(first: 30) {
+              nodes {
+                id title url closed
+                field(name: "Status") { ... on ProjectV2SingleSelectField { id options { id name } } }
+              }
             }
           }
         }
-      }
-    `,
-    { org: ORG },
-  )
+      `,
+      { org: ORG },
+    )
+  } catch (error) {
+    if (/not accessible by personal access token/i.test((error as Error).message)) {
+      throw new Error(
+        'Le token n’a pas accès aux projets de l’orga : ajoute-lui la permission Organizations → Projects (Read and write) sur github.com/settings/personal-access-tokens.',
+      )
+    }
+    throw error
+  }
   const project = data.organization.projectsV2.nodes.find((p) => p.title === PROJECT_TITLE && !p.closed)
   if (!project?.field?.options) return null
   const options: Kanban['options'] = {}
