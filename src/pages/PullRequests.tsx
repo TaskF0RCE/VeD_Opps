@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { TEAM, WIP_LABEL } from '../config'
+import { TEAM, WIP_LABEL, sameLogin } from '../config'
 import { useSession } from '../context'
 import { approvePullRequest, markReadyForReview, mergePullRequest } from '../github/actions'
 import { errorMessage } from '../github/client'
@@ -13,12 +13,19 @@ const isWip = (pr: PullRequest) => pr.isDraft || pr.labels.includes(WIP_LABEL)
 // Qui doit reviewer : les personnes demandées, sinon les autres membres de l'équipe.
 function reviewersOf(pr: PullRequest) {
   if (pr.requestedReviewers.length > 0) return pr.requestedReviewers
-  return TEAM.filter((login) => login !== pr.author && !pr.approvedBy.includes(login))
+  return TEAM.filter((login) => !sameLogin(login, pr.author) && !pr.approvedBy.some((a) => sameLogin(a, login)))
 }
 
-// Les PR qui attendent la review de `login`.
+// Les PR qui attendent la review de `login`. Une seule approbation suffit :
+// dès qu'un membre a approuvé, la PR ne réclame plus la relecture des autres.
 function awaitingReviewFrom(prs: PullRequest[], login: string) {
-  return prs.filter((pr) => !isWip(pr) && pr.author !== login && reviewersOf(pr).includes(login))
+  return prs.filter(
+    (pr) =>
+      !isWip(pr) &&
+      pr.approvedBy.length === 0 &&
+      !sameLogin(pr.author, login) &&
+      reviewersOf(pr).some((r) => sameLogin(r, login)),
+  )
 }
 
 export function PullRequests({ params }: PageProps) {
@@ -159,7 +166,7 @@ export function PullRequests({ params }: PageProps) {
           const count = awaitingReviewFrom(all, login).length
           return (
             <span key={login} className={`reviewer${count > 0 ? ' reviewer-busy' : ''}`}>
-              👀 <b>{login === me ? 'toi' : login}</b> : {count === 0 ? 'rien à reviewer' : `${count} PR à reviewer`}
+              👀 <b>{sameLogin(login, me) ? 'toi' : login}</b> : {count === 0 ? 'rien à reviewer' : `${count} PR à reviewer`}
             </span>
           )
         })}

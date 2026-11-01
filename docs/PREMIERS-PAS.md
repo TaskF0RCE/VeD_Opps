@@ -1,6 +1,6 @@
 # Premiers pas sur TaskF0RCE 👋
 
-Ce guide est pour toi, **@klem844** (et pour toute personne qui nous rejoindrait). Compte 20 minutes.
+Ce guide est pour toute personne qui rejoint l'orga (**@klem844**, **@Paul55672**…). Compte 20 minutes.
 Fini les versions qui circulent sur Discord : tout passe maintenant par GitHub, avec un tableau de bord pour piloter le tout.
 
 ## 1. Installer les outils (une fois)
@@ -40,7 +40,7 @@ On s'entraîne sur un vrai projet avec une toute petite tâche, par exemple comp
 2. **Clone** le projet si ce n'est pas déjà fait (GitHub Desktop : *File → Clone repository*).
 3. **Change de branche** : GitHub Desktop → *Fetch origin* → *Current branch* → `feature/complete-le-readme`.
 4. **Modifie** `README.md`, puis **commit** (« complète la section Démarrer ») et **Push origin**.
-5. **Dashboard → Pull requests → Prête pour review**. snakeify reçoit la demande.
+5. **Dashboard → Pull requests → Prête pour review**. Les autres membres reçoivent la demande.
 6. Quand il a approuvé et que la CI est verte : **Merger**. 🎉
 7. Reviens sur `main` et fais **Pull origin** pour repartir de la dernière version.
 
@@ -51,13 +51,13 @@ Tu viens de faire le cycle complet : **issue → branche → commit → PR → r
 1. **Jamais de travail directement sur `main`.** Toujours une branche (`feature/…` ou `fix/…`).
 2. **Une tâche = une branche = une PR.** Des petites PR se relisent vite.
 3. **Le titre de la PR commence par un type** : `feat:`, `fix:`, `docs:`… C'est lui qui calcule la version.
-4. **On review le code de l'autre**, avec bienveillance. Personne ne merge sans approbation.
+4. **On review le code des autres**, avec bienveillance. Personne ne merge sans l'approbation d'un autre membre.
 5. **Pull avant de commencer**, push souvent.
 
 ## 6. Quand tu bloques
 
 - Le guide complet est dans le **`CONTRIBUTING.md`** de chaque projet : chaque étape y est expliquée en version dashboard, GitHub Desktop et VS Code, avec une FAQ (CI rouge, conflits, commit sur `main` par erreur…).
 - Bouton « Merger » grisé ? Survole-le, il dit ce qui manque.
-- Sinon : demande à snakeify, ou ouvre une issue avec le label `question`.
+- Sinon : demande dans l'équipe, ou ouvre une issue avec le label `question`.
 
 Bienvenue ! 🚀
