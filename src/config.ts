@@ -2,8 +2,11 @@
 
 export const ORG = 'TaskF0RCE'
 
-// Les membres de l'équipe : chacun review le code de l'autre.
-export const TEAM = ['snakeify', 'klem844']
+// Les membres de l'équipe : chaque PR doit être approuvée par un autre membre.
+export const TEAM = ['snakeify', 'klem844', 'Paul55672']
+
+// GitHub ne tient pas compte des majuscules dans les pseudos.
+export const sameLogin = (a: string | null, b: string | null) => !!a && !!b && a.toLowerCase() === b.toLowerCase()
 
 // Repo dont chaque nouveau projet est une copie (marqué "Template repository").
 export const TEMPLATE_REPO = 'project-template'

@@ -7,6 +7,7 @@ const PERMISSIONS: [string, string, string][] = [
   ['Contents', 'Read and write', 'créer les branches de feature'],
   ['Issues', 'Read and write', 'créer les issues et synchroniser les labels'],
   ['Pull requests', 'Read and write', 'ouvrir, approuver et merger les PR'],
+  ['Repository creation', 'Read and write', 'bouton « Nouveau projet »'],
   ['Metadata', 'Read-only', 'ajoutée automatiquement par GitHub'],
 ]
 
@@ -47,7 +48,7 @@ export function TokenGuide() {
         </li>
         <li>
           Clique sur <b>Generate token</b>, copie-le (il commence par <code>github_pat_</code>) et colle-le ci-dessous. Si GitHub l’indique
-          « pending », l’autre Owner doit l’approuver dans Settings → Personal access tokens → Pending requests de l’orga.
+          « pending », un Owner de l’orga doit l’approuver dans Settings → Personal access tokens → Pending requests de l’orga.
         </li>
       </ol>
       <p className="muted">

@@ -1,7 +1,7 @@
 // Actions déclenchées par les boutons : approuver, merger, passer en review,
 // démarrer une feature, lancer une release.
 
-import { ORG, RELEASE_WORKFLOW, TEAM, WIP_LABEL } from '../config'
+import { ORG, RELEASE_WORKFLOW, TEAM, WIP_LABEL, sameLogin } from '../config'
 import { type GitHub, errorMessage, httpStatus } from './client'
 import { findKanban, placeOnKanban } from './kanban'
 import { type WorkKind, namesFor } from './logic'
@@ -28,7 +28,7 @@ export async function mergePullRequest(gh: GitHub, pr: PullRequest) {
   }
 }
 
-// Brouillon → prête : on demande la review de l'autre membre et on déplace la carte.
+// Brouillon → prête : on demande la review des autres membres et on déplace la carte.
 export async function markReadyForReview(gh: GitHub, pr: PullRequest) {
   if (pr.isDraft) {
     await gh.graphql(
@@ -39,7 +39,7 @@ export async function markReadyForReview(gh: GitHub, pr: PullRequest) {
   if (pr.labels.includes(WIP_LABEL)) {
     await gh.rest.issues.removeLabel({ owner: ORG, repo: pr.repo, issue_number: pr.number, name: WIP_LABEL })
   }
-  const reviewers = TEAM.filter((login) => login !== pr.author)
+  const reviewers = TEAM.filter((login) => !sameLogin(login, pr.author))
   if (reviewers.length > 0) {
     await gh.rest.pulls.requestReviewers({ owner: ORG, repo: pr.repo, pull_number: pr.number, reviewers })
   }
