@@ -114,7 +114,9 @@ export async function applyRuleset(gh: GitHub, repo: string, log: Log) {
       },
     ]
     // Exiger la CI seulement si le repo en a une, sinon plus personne ne pourrait merger.
-    if (await hasFile(gh, repo, CI_WORKFLOW_FILE)) {
+    // Le repo .github contient bien un ci.yml, mais c'est le workflow réutilisable
+    // (workflow_call) : il ne tourne jamais sur ses propres PR, le check n'arriverait jamais.
+    if (repo !== ORG_CONFIG_REPO && (await hasFile(gh, repo, CI_WORKFLOW_FILE))) {
       rules.push({
         type: 'required_status_checks',
         parameters: { strict_required_status_checks_policy: false, required_status_checks: [{ context: REQUIRED_CHECK }] },
